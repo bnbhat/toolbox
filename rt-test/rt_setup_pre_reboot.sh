@@ -33,8 +33,8 @@ configure_board() {
             BOARD_LABEL="Hamoa (IQ-X7181)"
             ;;
         rb3lite)
-            RT_CPU=1
-            HOUSEKEEP_RANGE="0,2-5"
+            RT_CPU=5
+            HOUSEKEEP_RANGE="0-4"
             BOARD_LABEL="RB3 Lite"
             ;;
         *)
@@ -93,7 +93,7 @@ Boards:
   rb8      Snapdragon RB8      — 8  CPUs (0-7),  RT CPU=7,  housekeeping=0-6
   rb4      Snapdragon RB4      — 8  CPUs (0-7),  RT CPU=3,  housekeeping=0-2,4-7
   hamoa    Hamoa/IQ-X7181      — 12 CPUs (0-11), RT CPU=11, housekeeping=0-10
-  rb3lite  RB3 Lite            — 6  CPUs (0-5),  RT CPU=1,  housekeeping=0,2-5
+  rb3lite  RB3 Lite            — 6  CPUs (0-5),  RT CPU=5,  housekeeping=0-4
 
 After this script completes and the system reboots, run:
   sudo ./rt_setup_post_reboot.sh --board <board> --hours <N>
