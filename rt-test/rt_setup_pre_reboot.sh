@@ -3,7 +3,7 @@
 # RT Test Setup — Part 1 (Pre-Reboot)
 # Run this script once on the target device before rebooting.
 #
-# Usage: sudo ./rt_setup_pre_reboot.sh --board <rb8|rb4|hamoa>
+# Usage: sudo ./rt_setup_pre_reboot.sh --board <rb8|rb4|hamoa|rb3lite>
 #
 # What it does:
 #   1. Installs linux-qcom-rt kernel
@@ -14,10 +14,6 @@
 # ==============================================================================
 
 set -euo pipefail
-
-# ------------------------------------------------------------------------------
-# Board Configurations
-# ------------------------------------------------------------------------------
 
 configure_board() {
     case "${BOARD}" in
@@ -36,8 +32,13 @@ configure_board() {
             HOUSEKEEP_RANGE="0-10"
             BOARD_LABEL="Hamoa (IQ-X7181)"
             ;;
+        rb3lite)
+            RT_CPU=1
+            HOUSEKEEP_RANGE="0,2-5"
+            BOARD_LABEL="RB3 Lite"
+            ;;
         *)
-            echo "ERROR: Unknown board '${BOARD}'. Supported: rb8, rb4, hamoa"
+            echo "ERROR: Unknown board '${BOARD}'. Supported: rb8, rb4, hamoa, rb3lite"
             exit 1
             ;;
     esac
@@ -47,10 +48,6 @@ configure_board() {
     echo "Housekeeping   : CPUs ${HOUSEKEEP_RANGE}"
     echo ""
 }
-
-# ------------------------------------------------------------------------------
-# Helpers
-# ------------------------------------------------------------------------------
 
 check_root() {
     if [[ "${EUID}" -ne 0 ]]; then
@@ -63,19 +60,11 @@ log() {
     echo "[$(date '+%H:%M:%S')] $*"
 }
 
-# ------------------------------------------------------------------------------
-# Step 1: Install RT kernel
-# ------------------------------------------------------------------------------
-
 step_install() {
     log "==> Step 1: Installing RT kernel..."
     apt-get install -y linux-qcom-rt
     log "RT kernel installed."
 }
-
-# ------------------------------------------------------------------------------
-# Step 2: Configure GRUB
-# ------------------------------------------------------------------------------
 
 step_grub() {
     log "==> Step 2: Configuring GRUB for CPU isolation..."
@@ -96,18 +85,15 @@ EOF
     log "GRUB updated."
 }
 
-# ------------------------------------------------------------------------------
-# Argument parsing
-# ------------------------------------------------------------------------------
-
 usage() {
     cat <<EOF
-Usage: sudo $0 --board <rb8|rb4|hamoa>
+Usage: sudo $0 --board <rb8|rb4|hamoa|rb3lite>
 
 Boards:
-  rb8     Snapdragon RB8  — 8  CPUs (0-7),  RT CPU=7,  housekeeping=0-6
-  rb4     Snapdragon RB4  — 8  CPUs (0-7),  RT CPU=3,  housekeeping=0-2,4-7
-  hamoa   Hamoa/IQ-X7181  — 12 CPUs (0-11), RT CPU=11, housekeeping=0-10
+  rb8      Snapdragon RB8      — 8  CPUs (0-7),  RT CPU=7,  housekeeping=0-6
+  rb4      Snapdragon RB4      — 8  CPUs (0-7),  RT CPU=3,  housekeeping=0-2,4-7
+  hamoa    Hamoa/IQ-X7181      — 12 CPUs (0-11), RT CPU=11, housekeeping=0-10
+  rb3lite  RB3 Lite            — 6  CPUs (0-5),  RT CPU=1,  housekeeping=0,2-5
 
 After this script completes and the system reboots, run:
   sudo ./rt_setup_post_reboot.sh --board <board> --hours <N>
