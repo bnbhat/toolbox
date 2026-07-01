@@ -8,7 +8,7 @@
 # What it does:
 #   1. Verifies RT kernel is running
 #   2. Applies runtime optimizations (non-persistent)
-#   3. Runs cyclictest and saves report + histogram
+#   3. Runs cyclictest and saves compact report + histogram + JSON final stats
 # ==============================================================================
 
 set -euo pipefail
@@ -136,6 +136,7 @@ step_test() {
     local base="rt_report_${BOARD}_${timestamp}"
     local report_file="${base}.txt"
     local hist_file="${base}.hist"
+    local json_file="${base}.json"
 
     log "==> Step 3: Running cyclictest..."
     log "  Duration         : ${TEST_HOURS} hour(s)"
@@ -144,6 +145,7 @@ step_test() {
     log "  Histogram buckets: 0-${hist_buckets} us"
     log "  Report file      : ${report_file}"
     log "  Histogram file   : ${hist_file}"
+    log "  JSON final stats : ${json_file}"
     echo ""
 
     if ! command -v cyclictest &>/dev/null; then
@@ -166,14 +168,15 @@ step_test() {
         echo "Interval       : ${interval_us} us"
         echo "Total loops    : ${loop_count}"
         echo "Histogram      : 0-${hist_buckets} us  =>  ${hist_file}"
-        echo "Command        : cyclictest -a ${RT_CPU} -t 1 -m \\\""
-        echo "                   -l ${loop_count} -i ${interval_us} -p 95 \\\""
-        echo "                   -h ${hist_buckets} --histfile=${hist_file}"
+        echo "JSON result    : ${json_file}"
+        echo "Command        : cyclictest -a ${RT_CPU} -t 1 -m \""
+        echo "                   -l ${loop_count} -i ${interval_us} -p 95 \""
+        echo "                   -h ${hist_buckets} --histfile=${hist_file} --json=${json_file}"
         echo "============================================================"
         echo ""
-    } | tee "${report_file}"
+    } > "${report_file}"
 
-    log "  Launching cyclictest... (Press Ctrl+C to stop early)"
+    log "  Launching cyclictest... (terminal output only; report stays compact)"
     echo ""
 
     local exit_code=0
@@ -186,13 +189,13 @@ step_test() {
         -p 95 \
         -h "${hist_buckets}" \
         --histfile="${hist_file}" \
-        2>&1 | tee -a "${report_file}" || exit_code=$?
+        --json="${json_file}" || exit_code=$?
 
     if [[ -f "${hist_file}" && -s "${hist_file}" ]]; then
         {
             echo ""
             echo "============================================================"
-            echo " Histogram Summary  (from ${hist_file})"
+            echo " Histogram Summary  (top 20 bins by latency)"
             echo " Format: latency_us   hit_count"
             echo "------------------------------------------------------------"
             awk '!/^#/ && NF>=2 && $2>0 { printf "  %6s us   %s\n", $1, $2 }' "${hist_file}" \
@@ -201,7 +204,7 @@ step_test() {
             echo "------------------------------------------------------------"
             echo " Full histogram data: ${hist_file}"
             echo "============================================================"
-        } | tee -a "${report_file}"
+        } >> "${report_file}"
     fi
 
     {
@@ -213,15 +216,17 @@ step_test() {
         if [[ ${exit_code} -eq 0 ]]; then
             echo "Exit status    : 0 (SUCCESS)"
         else
-            echo "Exit status    : ${exit_code} (check output above)"
+            echo "Exit status    : ${exit_code} (check terminal output)"
         fi
         echo "Report file    : ${report_file}"
+        echo "JSON file      : ${json_file}"
         echo "Histogram file : ${hist_file}"
         echo "============================================================"
-    } | tee -a "${report_file}"
+    } >> "${report_file}"
 
     log ""
     log "Report   : ${report_file}"
+    log "JSON     : ${json_file}"
     log "Histogram: ${hist_file}"
 }
 
@@ -239,7 +244,8 @@ Options:
   --hours N   Duration for cyclictest in hours (required, must be >= 1)
 
 Output files:
-  rt_report_<board>_<timestamp>.txt   Human-readable report
+  rt_report_<board>_<timestamp>.txt   Compact human-readable report
+  rt_report_<board>_<timestamp>.json  Final cyclictest stats (JSON)
   rt_report_<board>_<timestamp>.hist  Raw histogram TSV from cyclictest
 EOF
     exit 1
