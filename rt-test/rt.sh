@@ -32,14 +32,14 @@ configure_platform() {
             TOTAL_CPUS=12
             HOUSEKEEP="0-10"
             IRQ_MASK="7ff"
-            LABEL="Hamoa (IoT EVK)"
+            LABEL="Hamoa"
             ;;
         rb8)
             RT_CPU=7
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
-            LABEL="RB8 (IQ-9075)"
+            LABEL="RB8"
             ;;
         amr)
             # Same configuration as rb8.
@@ -47,14 +47,14 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
-            LABEL="AMR (Lemans)"
+            LABEL="AMR"
             ;;
         rb4)
             RT_CPU=3
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
-            LABEL="RB4 (IQ8 8275)"
+            LABEL="RB4"
             ;;
         monza2)
             # Same configuration as rb4.
@@ -62,14 +62,14 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
-            LABEL="Monza2 (Monaco)"
+            LABEL="Monza2"
             ;;
         rb3lite)
             RT_CPU=5
             TOTAL_CPUS=6
             HOUSEKEEP="0-4"
             IRQ_MASK="1f"
-            LABEL="RB3 Gen2 Lite (QCS5430)"
+            LABEL="RB3 Gen2 Lite"
             ;;
         rb3)
             # Same configuration as rb8.
