@@ -205,7 +205,7 @@ Options (test):
   -l, --load [pct]        stress-ng background load on housekeeping CPUs (default 60).
   -v, --verbose           Live cyclictest output instead of quiet summary.
   -h, --help              Show this help.
-  -- <args...>            Pass any extra arguments straight to cyclictest.
+  -- <args...>            Pass any extra arguments to cyclictest.
 EOF
     exit 1
 }
