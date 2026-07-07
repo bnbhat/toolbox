@@ -1,11 +1,4 @@
 #!/bin/bash
-# RT test tool — setup / test for PREEMPT_RT on Qualcomm boards.
-#
-# Usage:
-#   sudo ./rt.sh setup [-p <platform>]
-#   sudo ./rt.sh test  [-p <platform>] [-t <minutes>] [-l [pct]] [-M <cpu>] [-v]
-#
-# Platform is auto-detected from the device-tree model; override with -p.
 
 set -euo pipefail
 
@@ -186,6 +179,7 @@ cmd_test() {
     [[ ${#EXTRA_ARGS[@]} -gt 0 ]] && opts+=("${EXTRA_ARGS[@]}")
 
     start_stress
+    echo "==> Running: cyclictest ${opts[*]}"
     cyclictest "${opts[@]}" || true
     stop_stress
 
@@ -196,8 +190,8 @@ usage() {
     cat <<EOF
 Usage: sudo ${0##*/} <setup|test> [options]
 
-  setup    Install linux-qcom-rt, configure GRUB CPU isolation, reboot.
-  test     Apply runtime tuning and run cyclictest (JSON result saved).
+  setup    Install linux-qcom-rt, configure cmdline for CPU isolation, reboot.
+  test     Apply runtime tuning and run cyclictest.
 
 Options (test):
   -p, --platform <name>   Override auto-detection (${PLATFORMS[*]}).
