@@ -32,7 +32,6 @@ configure_platform() {
             TOTAL_CPUS=12
             HOUSEKEEP="0-10"
             IRQ_MASK="7ff"
-            WQ_MASK="7FF"
             LABEL="Hamoa (IoT EVK)"
             ;;
         rb8)
@@ -40,7 +39,6 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
-            WQ_MASK="7F"
             LABEL="RB8 (IQ-9075)"
             ;;
         amr)
@@ -49,7 +47,6 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
-            WQ_MASK="7F"
             LABEL="AMR (Lemans)"
             ;;
         rb4)
@@ -57,7 +54,6 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
-            WQ_MASK="F7"
             LABEL="RB4 (IQ8 8275)"
             ;;
         monza2)
@@ -66,7 +62,6 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
-            WQ_MASK="F7"
             LABEL="Monza2 (Monaco)"
             ;;
         rb3lite)
@@ -74,7 +69,6 @@ configure_platform() {
             TOTAL_CPUS=6
             HOUSEKEEP="0-4"
             IRQ_MASK="1f"
-            WQ_MASK="1F"
             LABEL="RB3 Gen2 Lite (QCS5430)"
             ;;
         rb3)
@@ -83,7 +77,6 @@ configure_platform() {
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
-            WQ_MASK="7F"
             LABEL="RB3 Gen2"
             ;;
         *)
@@ -179,7 +172,7 @@ cmd_test() {
     write 1           /sys/devices/system/cpu/cpu*/cpuidle/state*/disable
     write 0           /sys/kernel/tracing/tracing_on
     write 0           /proc/sys/kernel/timer_migration
-    write "$WQ_MASK"  /sys/devices/virtual/workqueue/*/cpumask
+    write "$IRQ_MASK" /sys/devices/virtual/workqueue/*/cpumask
     write -1          /proc/sys/kernel/sched_rt_runtime_us
     systemctl stop irqbalanced 2>/dev/null || true
     write "$IRQ_MASK" /proc/irq/[0-9]*/smp_affinity
