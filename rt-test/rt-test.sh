@@ -3,7 +3,7 @@
 set -euo pipefail
 
 GRUB_CFG="/etc/default/grub.d/98_realtime.cfg"
-EXTRA_CMDLINE="rcupdate.rcu_expedited=1"   # applied to every platform except hamoa
+EXTRA_CMDLINE=""   # applied to every platform except hamoa
 
 # Detection order matters: rb3lite before rb3 (both DT models contain "rb3gen2").
 PLATFORMS=(hamoa rb8 amr rb4 monza2 rb3lite rb3)
@@ -22,6 +22,7 @@ configure_platform() {
     case "$PLATFORM" in
         hamoa)
             RT_CPU=11
+            CYCLICTEST_CPU=10
             TOTAL_CPUS=12
             HOUSEKEEP="0-10"
             IRQ_MASK="7ff"
@@ -29,6 +30,7 @@ configure_platform() {
             ;;
         rb8)
             RT_CPU=7
+            CYCLICTEST_CPU=6
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
@@ -37,6 +39,7 @@ configure_platform() {
         amr)
             # Same configuration as rb8.
             RT_CPU=7
+            CYCLICTEST_CPU=6
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
@@ -44,6 +47,7 @@ configure_platform() {
             ;;
         rb4)
             RT_CPU=3
+            CYCLICTEST_CPU=2
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
@@ -52,6 +56,7 @@ configure_platform() {
         monza2)
             # Same configuration as rb4.
             RT_CPU=3
+            CYCLICTEST_CPU=2
             TOTAL_CPUS=8
             HOUSEKEEP="0-2,4-7"
             IRQ_MASK="f7"
@@ -59,6 +64,7 @@ configure_platform() {
             ;;
         rb3lite)
             RT_CPU=5
+            CYCLICTEST_CPU=4
             TOTAL_CPUS=6
             HOUSEKEEP="0-4"
             IRQ_MASK="1f"
@@ -67,6 +73,7 @@ configure_platform() {
         rb3)
             # Same configuration as rb8.
             RT_CPU=7
+            CYCLICTEST_CPU=6
             TOTAL_CPUS=8
             HOUSEKEEP="0-6"
             IRQ_MASK="7f"
@@ -173,8 +180,9 @@ cmd_test() {
     command -v cyclictest &>/dev/null || apt-get install -y rt-tests
 
     local json="rt_${PLATFORM}_$(date +%Y%m%d_%H%M%S).json"
-    local opts=(-a "$RT_CPU" -t 1 -m -p 95 -i 1000
-                -l "$((TEST_MINUTES * 60 * 1000))" --json="$json")
+    local opts=(-a "$RT_CPU" -t 1 -m -p 99 -i 1000
+                -l "$((TEST_MINUTES * 60 * 1000))" --json="$json"
+                --mainaffinity="$CYCLICTEST_CPU")
     [[ "$VERBOSE" == true ]] || opts+=(-q)
     [[ ${#EXTRA_ARGS[@]} -gt 0 ]] && opts+=("${EXTRA_ARGS[@]}")
 
